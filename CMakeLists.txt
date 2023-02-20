@@ -166,7 +166,7 @@ file(GLOB SRC_FILES
 
 # Compile the main executable
 if(WIN32)
-    set(SRC_FILES ${SRC_FILES} windows/resource.rc)
+    set(SRC_FILES ${SRC_FILES} packaging/windows/resource.rc)
 
     # Add the executable with a WinMain entry point on Windows.
     # See https://cmake.org/cmake/help/latest/prop_tgt/WIN32_EXECUTABLE.html
