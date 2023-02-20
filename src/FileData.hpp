@@ -11,10 +11,12 @@
 
 class FileData {
   public:
-    FileData(const wxString &fileName);
+    // FileData(const wxString &fileName);
+    FileData(const wxFileName &fileName);
     virtual ~FileData();
 
     wxFileName getFileName() const;
+
     int getStateMP3() const;
     void setStateMP3(int state);
 

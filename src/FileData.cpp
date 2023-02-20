@@ -6,8 +6,9 @@
 #include "FileData.hpp"
 #include "Constants.hpp"
 
-FileData::FileData(const wxString &fileName) : m_fileName(fileName), m_stateMP3(STATE_MP3_UNKNOWN) {
+FileData::FileData(const wxFileName &fileName) : m_fileName(fileName), m_stateMP3(STATE_MP3_UNKNOWN) {
 }
+
 
 FileData::~FileData() {
 }
