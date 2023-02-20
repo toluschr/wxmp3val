@@ -49,6 +49,15 @@ GuiFrameMain::GuiFrameMain(wxWindow *parent) : FrameMain(parent), m_processRunni
 
     // Updates the controls
     updateControls();
+
+    wxArrayString stdoutString;
+    wxExecute(APP_TOOL_EXECUTABLE + _T(" -v"), stdoutString, wxEXEC_NODISABLE | wxEXEC_SYNC);
+
+    // Show the version of tool
+    if (!stdoutString.IsEmpty())
+        gui_mainStatusBar->SetStatusText(_("Using MP3val version: ") + stdoutString.Item(0).AfterLast(' '), 0);
+    else
+        gui_mainStatusBar->SetStatusText(_("MP3val not found!"), 0);
 }
 
 GuiFrameMain::~GuiFrameMain() {
@@ -256,55 +265,6 @@ void GuiFrameMain::mnuAbout(wxCommandEvent &event) {
     event.Skip(false);
 }
 
-void GuiFrameMain::OnTimer1Trigger(wxTimerEvent &event) {
-    wxString newExeTool = APP_TOOL_EXECUTABLE;
-    if (!m_exeTool.IsSameAs(newExeTool, false)) {
-        m_exeInputString.Clear();
-        m_exeInputErrorString.Clear();
-        m_exeTool = newExeTool;
-        // Execute external application
-        wxExecute(m_exeTool + _T(" -v"), m_exeInputString, m_exeInputErrorString, wxEXEC_NODISABLE);
-
-        // Show the version of tool
-        wxString version;
-        if (!m_exeInputString.IsEmpty()) {
-            version = _("Using MP3val version: ");
-            version += m_exeInputString.Item(0).AfterLast(' ');
-        } else {
-            version = _("MP3val not found!");
-        }
-        gui_mainStatusBar->SetStatusText(version, 0);
-    }
-
-    // Show the number of files in list on status bar
-    wxString strNFiles;
-    strNFiles += wxString::Format(_T("%i "), gui_lstFiles->GetItemCount());
-    strNFiles += _("files");
-    gui_mainStatusBar->SetStatusText(strNFiles, 1);
-
-    for (size_t i = 0; i < gui_menuBar->GetMenuCount(); i++)
-        gui_menuBar->EnableTop(i, !m_processRunning);
-
-    gui_toolBar->Enable(!m_processRunning);
-
-    gui_menu->Enable(ID_REMOVE_FILES, gui_lstFiles->GetSelectedItemCount() > 0 && !m_processRunning);
-    gui_menuBar->Enable(ID_REMOVE_FILES, gui_lstFiles->GetSelectedItemCount() > 0 && !m_processRunning);
-    gui_toolBar->EnableTool(ID_REMOVE_FILES, gui_lstFiles->GetSelectedItemCount() > 0 && !m_processRunning);
-
-    gui_menu->Enable(ID_CLEAR_LIST, gui_lstFiles->GetItemCount() > 0 && !m_processRunning);
-    gui_menuBar->Enable(ID_CLEAR_LIST, gui_lstFiles->GetItemCount() > 0 && !m_processRunning);
-    gui_toolBar->EnableTool(ID_CLEAR_LIST, gui_lstFiles->GetItemCount() > 0 && !m_processRunning);
-
-    gui_menuBar->Enable(ID_SCAN, gui_lstFiles->GetItemCount() > 0 && !m_processRunning);
-    gui_toolBar->EnableTool(ID_SCAN, gui_lstFiles->GetItemCount() > 0 && !m_processRunning);
-
-    gui_menuBar->Enable(ID_REPAIR, gui_lstFiles->GetItemCount() > 0 && !m_processRunning);
-    gui_toolBar->EnableTool(ID_REPAIR, gui_lstFiles->GetItemCount() > 0 && !m_processRunning);
-
-    gui_btnStop->Enable(m_processRunning);
-    event.Skip(false);
-}
-
 void GuiFrameMain::loadResources() {
     wxString dataDir = getDataDir();
 
@@ -323,13 +283,36 @@ void GuiFrameMain::loadResources() {
 }
 
 void GuiFrameMain::updateControls() {
-    /*
-     * :KLUDGE:
-     * EVT_LIST_INSERT_ITEM is triggered before or after item is added:
-     *   on wxGTK -> triggered before item is added;
-     *   on wxMSW -> triggered after item is added.
-     */
-    m_timer1.Start(20, true);
+    wxString strNFiles;
+    strNFiles += wxString::Format(_T("%i "), gui_lstFiles->GetItemCount());
+    strNFiles += _("files");
+    gui_mainStatusBar->SetStatusText(strNFiles, 1);
+
+    for (size_t i = 0; i < gui_menuBar->GetMenuCount(); i++)
+        gui_menuBar->EnableTop(i, !m_processRunning);
+
+    gui_toolBar->Enable(!m_processRunning);
+
+    // show if process not running
+    bool enableAfterImport = gui_lstFiles->GetItemCount() > 0 && !m_processRunning;
+
+    gui_toolBar->EnableTool(ID_SCAN, enableAfterImport);
+    gui_toolBar->EnableTool(ID_CLEAR_LIST, enableAfterImport);
+
+    gui_menuBar->Enable(ID_SCAN, enableAfterImport);
+    gui_menuBar->Enable(ID_CLEAR_LIST, enableAfterImport);
+
+    gui_btnStop->Enable(m_processRunning);
+
+    bool enableActions = gui_lstFiles->GetSelectedItemCount() > 0 && !m_processRunning;
+    gui_menu->Enable(ID_REMOVE_FILES, enableActions);
+    gui_menu->Enable(ID_CLEAR_LIST, enableActions);
+
+    gui_menuBar->Enable(ID_REMOVE_FILES, enableActions);
+    gui_menuBar->Enable(ID_REPAIR, enableActions);
+
+    gui_toolBar->EnableTool(ID_REMOVE_FILES, enableActions);
+    gui_toolBar->EnableTool(ID_REPAIR, enableActions);
 }
 
 void GuiFrameMain::setFilesCmdLine(const wxArrayString &filenames) {
@@ -364,105 +347,88 @@ void GuiFrameMain::processExecute() {
 }
 
 void GuiFrameMain::processFile(unsigned long int fileIterator) {
-    wxString fullCommand = APP_TOOL_EXECUTABLE;
     FileData &fileData = *(FileData *)gui_lstFiles->GetItemData(fileIterator);
-    wxFileName filenameInput = fileData.getFileName();
+    printf("%s\n", (const char*)fileData.getFileName().GetFullPath().c_str());
 
     // Do not process OK MP3's again
     if (fileData.getStateMP3() == STATE_MP3_OK)
         return;
 
-    // Works on a temp file
-    wxString filenameTemp = wxFileName::CreateTempFileName(_T("temp-")) + _T(".mp3");
-    wxCopyFile(filenameInput.GetFullPath(), filenameTemp, true);
+    wxString cmd = APP_TOOL_EXECUTABLE + _T(" \"") + fileData.getFileName().GetFullPath() + _T("\"");;
 
-    if (m_processType == TOOL_FIX)
-        fullCommand.append(_T(" -f ") + mp_appSettings->getStringToolOptions());
-
-    // Execute external application
-    wxExecute(fullCommand + _T(" \"") + filenameTemp + _T("\""), m_exeInputString, wxEXEC_NODISABLE | wxEXEC_SYNC);
-
-    // Process output string and updates the list
-    int stateMP3 = processOutputString(fileIterator);
-    fileData.setStateMP3(stateMP3);
-
-    // Delete temp file or rename to the original filename
-    if (m_processType == TOOL_SCAN)
-        wxRemoveFile(filenameTemp);
-    else {
-        wxRenameFile(filenameTemp, filenameInput.GetFullPath(), true);
-        // Rename backup file
-        wxString filenameTempBak = filenameTemp + _T(".bak");
-        if (wxFileExists(filenameTempBak))
-            wxRenameFile(filenameTempBak, filenameInput.GetFullPath() + _T(".bak"), true);
+    if (m_processType == TOOL_FIX) {
+        cmd += _T(" -f ") + mp_appSettings->getStringToolOptions();
     }
 
+    wxArrayString stdoutString;
+    wxExecute(cmd, stdoutString, wxEXEC_NODISABLE | wxEXEC_SYNC);
+
+    // Process output string and updates the list
+    fileData.setStateMP3(processOutputString(fileIterator, stdoutString));
     gui_mainStatusBar->SetStatusText(wxString::Format(_("Processed %lu files of %d."), fileIterator + 1, gui_lstFiles->GetItemCount()), 1);
 }
 
-int GuiFrameMain::processOutputString(unsigned long int fileIterator) {
-    wxString tempString;
+int GuiFrameMain::processOutputString(unsigned long int fileIterator, const wxArrayString &inputString) {
+    if (inputString.IsEmpty())
+        return STATE_MP3_OK;
+
     int stateMP3 = STATE_MP3_OK;
     int warningCount = 0;
 
-    if (!m_exeInputString.IsEmpty()) {
-        for (unsigned long int i = 0; i < m_exeInputString.GetCount(); i++) {
-            tempString = m_exeInputString.Item(i);
+    for (unsigned long int i = 0; i < inputString.GetCount(); i++) {
+        wxString tempString = inputString.Item(i);
 
-            if (tempString.Find(_T("MPEG frames")) != wxNOT_FOUND) {
-                // Cut the string for: "MPEG frames"
-                tempString = tempString.Right(tempString.Len() - tempString.Find(_T("MPEG frames")));
+        if (tempString.Find(_T("MPEG frames")) != wxNOT_FOUND) {
+            // Cut the string for: "MPEG frames"
+            tempString = tempString.Right(tempString.Len() - tempString.Find(_T("MPEG frames")));
 
-                // Update Version column
-                if (tempString.AfterFirst('(').BeforeFirst(')').Find(_T("MPEG")) != wxNOT_FOUND)
-                    gui_lstFiles->SetItem(fileIterator, ID_LIST_VERSION, tempString.AfterFirst('(').BeforeFirst(')'));
+            // Update Version column
+            if (tempString.AfterFirst('(').BeforeFirst(')').Find(_T("MPEG")) != wxNOT_FOUND)
+                gui_lstFiles->SetItem(fileIterator, ID_LIST_VERSION, tempString.AfterFirst('(').BeforeFirst(')'));
 
-                // Update Tags column
-                gui_lstFiles->SetItem(fileIterator, ID_LIST_TAGS, tempString.AfterFirst(',').BeforeFirst(','));
+            // Update Tags column
+            gui_lstFiles->SetItem(fileIterator, ID_LIST_TAGS, tempString.AfterFirst(',').BeforeFirst(','));
 
-                // Update CBR column
-                if (tempString.AfterFirst(',').AfterFirst(',').Find(_T("CBR")) != wxNOT_FOUND)
-                    gui_lstFiles->SetItem(fileIterator, ID_LIST_CBR, _T("CBR"));
-                else
-                    gui_lstFiles->SetItem(fileIterator, ID_LIST_CBR, _T("VBR"));
+            // Update CBR column
+            if (tempString.AfterFirst(',').AfterFirst(',').Find(_T("CBR")) != wxNOT_FOUND)
+                gui_lstFiles->SetItem(fileIterator, ID_LIST_CBR, _T("CBR"));
+            else
+                gui_lstFiles->SetItem(fileIterator, ID_LIST_CBR, _T("VBR"));
 
-                int semicolonAt = tempString.Find("; ");
-                if (semicolonAt != -1)
-                    gui_lstFiles->SetItem(fileIterator, ID_LIST_BITRATE, tempString.substr(semicolonAt + 2));
-            }
-
-            if (tempString.StartsWith(_T("WARNING: ")))
-                warningCount++;
-
-            if (tempString.Find(_T("tags in the file")) != wxNOT_FOUND)
-                warningCount--;
-
-            if (tempString.StartsWith(_T("FIXED: ")))
-                stateMP3 = STATE_MP3_FIXED;
+            int semicolonAt = tempString.Find("; ");
+            if (semicolonAt != -1)
+                gui_lstFiles->SetItem(fileIterator, ID_LIST_BITRATE, tempString.substr(semicolonAt + 2));
         }
 
-        if (stateMP3 == STATE_MP3_OK && warningCount > 0)
-            stateMP3 = STATE_MP3_PROBLEM;
+        if (tempString.StartsWith(_T("WARNING: ")))
+            warningCount++;
 
-        // Update State column
-        switch (stateMP3) {
-        default:
-        case STATE_MP3_OK:
-            gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("OK"));
-            gui_lstFiles->SetItemTextColour(fileIterator, *wxBLACK);
-            break;
-        case STATE_MP3_PROBLEM:
-            gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("PROBLEM"));
-            gui_lstFiles->SetItemTextColour(fileIterator, *wxRED);
-            break;
-        case STATE_MP3_FIXED:
-            gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("FIXED"));
-            gui_lstFiles->SetItemTextColour(fileIterator, *wxBLACK);
-            break;
-        }
+        if (tempString.Find(_T("tags in the file")) != wxNOT_FOUND)
+            warningCount--;
 
-        // Clear the output
-        m_exeInputString.Clear();
+        if (tempString.StartsWith(_T("FIXED: ")))
+            stateMP3 = STATE_MP3_FIXED;
     }
+
+    if (stateMP3 == STATE_MP3_OK && warningCount > 0)
+        stateMP3 = STATE_MP3_PROBLEM;
+
+    // Update State column
+    switch (stateMP3) {
+    default:
+    case STATE_MP3_OK:
+        gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("OK"));
+        gui_lstFiles->SetItemTextColour(fileIterator, *wxBLACK);
+        break;
+    case STATE_MP3_PROBLEM:
+        gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("PROBLEM"));
+        gui_lstFiles->SetItemTextColour(fileIterator, *wxRED);
+        break;
+    case STATE_MP3_FIXED:
+        gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("FIXED"));
+        gui_lstFiles->SetItemTextColour(fileIterator, *wxBLACK);
+        break;
+    }
+
     return stateMP3;
 }

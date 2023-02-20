@@ -37,22 +37,18 @@ class GuiFrameMain : public FrameMain {
     void mnuWebsite(wxCommandEvent &event);
     void mnuToolWebsite(wxCommandEvent &event);
     void mnuAbout(wxCommandEvent &event);
-    void OnTimer1Trigger(wxTimerEvent &event);
 
   private:
     void updateControls();
     void loadResources();
     void processExecute();
     void processFile(unsigned long int fileIterator);
-    int processOutputString(unsigned long int fileIterator);
+    int processOutputString(unsigned long int fileIterator, const wxArrayString &inputString);
 
     int m_lastSortCol = -1;
     AppSettings *mp_appSettings;
     ListManager *mp_listManager;
     FileDrop *mp_fileDrop;
-    wxString m_exeTool;
-    wxArrayString m_exeInputString;
-    wxArrayString m_exeInputErrorString;
     int m_processType;
     bool m_processRunning;
 };

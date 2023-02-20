@@ -15,7 +15,7 @@ const wxString APP_NAME = _T("wxMP3val");
 const wxString APP_VERSION = _T("4.1");
 const wxString APP_NAME_WITH_VERSION = APP_NAME + _T(" v") + APP_VERSION;
 
-const wxString APP_COPYRIGHT = _T("(C) 2011-2022 Cristiano Fraga G. Nunes <cfgnunes@gmail.com>");
+const wxString APP_COPYRIGHT = _T("(C) 2011-2023 Cristiano Fraga G. Nunes <cfgnunes@gmail.com>");
 const wxString APP_WEBSITE = _T("https://github.com/cfgnunes/wxmp3val");
 
 const wxString APP_TOOL_EXECUTABLE = _T("mp3val");
@@ -54,7 +54,8 @@ int const ID_LIST_FOLDER = 1;
 int const ID_LIST_VERSION = 2;
 int const ID_LIST_TAGS = 3;
 int const ID_LIST_CBR = 4;
-int const ID_LIST_STATE = 5;
+int const ID_LIST_BITRATE = 5;
+int const ID_LIST_STATE = 6;
 
 inline wxString getDataDir() {
     wxString executablePath = wxStandardPaths::Get().GetExecutablePath();
