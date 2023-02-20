@@ -26,7 +26,6 @@ string(TOLOWER ${CMAKE_PROJECT_NAME} CMAKE_BIN_NAME)
 # -----------------------------------------------------------------------------
 # wxWidgets
 # -----------------------------------------------------------------------------
-find_package(wxWidgets REQUIRED)
 
 if(WIN32)
     set(wxWidgets_ROOT_DIR "C:/wxWidgets-3.1.1")
@@ -34,6 +33,7 @@ if(WIN32)
     set(wxWidgets_CONFIGURATION mwsu)
 endif()
 
+find_package(wxWidgets REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 # -----------------------------------------------------------------------------
@@ -184,7 +184,7 @@ target_link_libraries(${CMAKE_BIN_NAME} ${wxWidgets_LIBRARIES})
 # Define the file locations during install process
 if(WIN32)
     install(TARGETS ${CMAKE_BIN_NAME} DESTINATION "/")
-    install(DIRECTORY "${CMAKE_DATA_DIR}" DESTINATION "${CMAKE_DATA_DIR}")
+    install(DIRECTORY "${CMAKE_DATA_DIR}" DESTINATION "/")
     install(FILES "${CMAKE_DOC_DIR}/CHANGELOG.md" DESTINATION "/" RENAME "Changelog.txt")
     install(FILES "${CMAKE_DOC_DIR}/COPYING" DESTINATION "/" RENAME "License.txt")
     install(FILES "${CMAKE_DOC_DIR}/README.md" DESTINATION "/" RENAME "Readme.txt")
