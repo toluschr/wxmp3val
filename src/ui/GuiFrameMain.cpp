@@ -103,7 +103,7 @@ struct compare_data {
     wxListCtrl *ctrl;
 };
 
-static int lstFiles_compare(wxIntPtr item1, wxIntPtr item2, wxIntPtr data) {
+static wxCALLBACK int lstFiles_compare(wxIntPtr item1, wxIntPtr item2, wxIntPtr data) {
     auto cmp = (struct compare_data *)data;
 
     long item1_idx = cmp->ctrl->FindItem(-1, item1);
