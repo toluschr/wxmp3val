@@ -24,6 +24,7 @@ class GuiFrameMain : public FrameMain {
     void OnlstFilesItemSelect(wxListEvent &event);
     void OnlstFilesItemRClick(wxListEvent &event);
     void OnlstFilesKeyDown(wxListEvent &event);
+    void OnlstFilesColClick(wxListEvent& event);
     void btnProcessStop(wxCommandEvent &event);
     void mnuAddDirectory(wxCommandEvent &event);
     void mnuAddFiles(wxCommandEvent &event);
@@ -45,6 +46,7 @@ class GuiFrameMain : public FrameMain {
     void processFile(unsigned long int fileIterator);
     int processOutputString(unsigned long int fileIterator);
 
+    int m_lastSortCol = -1;
     AppSettings *mp_appSettings;
     ListManager *mp_listManager;
     FileDrop *mp_fileDrop;

@@ -82,6 +82,7 @@ class FrameMain : public wxFrame
 		virtual void OnlstFilesItemSelect( wxListEvent& event ) { event.Skip(); }
 		virtual void OnlstFilesItemRClick( wxListEvent& event ) { event.Skip(); }
 		virtual void OnlstFilesKeyDown( wxListEvent& event ) { event.Skip(); }
+		virtual void OnlstFilesColClick( wxListEvent& event ) { event.Skip(); }
 		virtual void btnProcessStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuAddDirectory( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuAddFiles( wxCommandEvent& event ) { event.Skip(); }

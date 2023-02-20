@@ -97,6 +97,37 @@ void GuiFrameMain::OnlstFilesKeyDown(wxListEvent &event) {
     event.Skip();
 }
 
+struct compare_data {
+    int col;
+    int order;
+    wxListCtrl *ctrl;
+};
+
+static int lstFiles_compare(wxIntPtr item1, wxIntPtr item2, wxIntPtr data) {
+    auto cmp = (struct compare_data *)data;
+
+    long item1_idx = cmp->ctrl->FindItem(-1, item1);
+    long item2_idx = cmp->ctrl->FindItem(-1, item2);
+
+    return cmp->order * cmp->ctrl->GetItemText(item1_idx, cmp->col).compare(cmp->ctrl->GetItemText(item2_idx, cmp->col));
+}
+
+void GuiFrameMain::OnlstFilesColClick(wxListEvent &event) {
+    if (!m_processRunning) {
+        struct compare_data cmp;
+        cmp.col = event.GetColumn();
+        cmp.order = (cmp.col == m_lastSortCol) ? -1 : +1;
+        cmp.ctrl = gui_lstFiles;
+        m_lastSortCol = cmp.col;
+
+        // gui_lstFiles->SetWindowStyleFlag(wxLC_REPORT | wxLC_SORT_ASCENDING);
+        gui_lstFiles->SortItems(lstFiles_compare, (wxIntPtr)&cmp);
+        updateControls();
+    }
+
+    event.Skip();
+}
+
 void GuiFrameMain::btnProcessStop(wxCommandEvent &event) {
     m_processRunning = false;
     gui_btnStop->Enable(false);
