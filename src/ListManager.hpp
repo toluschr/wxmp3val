@@ -21,17 +21,9 @@ class ListManager {
     void insertFilesAndDir(const wxArrayString &filenames);
     void insertFiles(const wxArrayString &filenames);
     void insertDir(const wxString &dirname);
-    void deleteItem(unsigned long int index);
-    void clear();
-    long unsigned int size();
-    FileData &getFileData(unsigned long int index);
-    wxListCtrl &getListCtrl();
 
   private:
-    bool checkValidExtension(const wxFileName &file) const;
-
     wxListCtrl *mp_listCtrl;
-    std::list<FileData> *mp_filesData;
 };
 
 #endif // LIST_MANAGER_HPP

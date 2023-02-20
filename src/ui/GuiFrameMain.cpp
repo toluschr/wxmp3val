@@ -58,7 +58,7 @@ GuiFrameMain::~GuiFrameMain() {
 
 void GuiFrameMain::OnlstFilesDeleteItem(wxListEvent &event) {
     if (!m_processRunning) {
-        mp_listManager->deleteItem((unsigned long)event.GetIndex());
+        delete (FileData*)gui_lstFiles->GetItemData(event.GetIndex());
         updateControls();
     }
     event.Skip();
@@ -162,9 +162,13 @@ void GuiFrameMain::mnuRemoveFiles(wxCommandEvent &event) {
 }
 
 void GuiFrameMain::mnuClearList(wxCommandEvent &event) {
-    // Deletes all items from the list
-    mp_listManager->clear();
+    long itemIndex = -1;
 
+    while ((itemIndex = gui_lstFiles->GetNextItem(itemIndex)) != wxNOT_FOUND) {
+        delete (FileData *)gui_lstFiles->GetItemData(itemIndex);
+    }
+
+    gui_lstFiles->DeleteAllItems();
     updateControls();
     event.Skip(false);
 }
@@ -302,7 +306,7 @@ void GuiFrameMain::setFilesCmdLine(const wxArrayString &filenames) {
 }
 
 void GuiFrameMain::processExecute() {
-    unsigned long int total = mp_listManager->size();
+    unsigned long int total = gui_lstFiles->GetItemCount();
     unsigned long int fileIdx;
     wxString msg;
 
@@ -330,7 +334,7 @@ void GuiFrameMain::processExecute() {
 
 void GuiFrameMain::processFile(unsigned long int fileIterator) {
     wxString fullCommand = APP_TOOL_EXECUTABLE;
-    FileData &fileData = mp_listManager->getFileData(fileIterator);
+    FileData &fileData = *(FileData *)gui_lstFiles->GetItemData(fileIterator);
     wxFileName filenameInput = fileData.getFileName();
 
     // Do not process OK MP3's again
@@ -362,7 +366,7 @@ void GuiFrameMain::processFile(unsigned long int fileIterator) {
             wxRenameFile(filenameTempBak, filenameInput.GetFullPath() + _T(".bak"), true);
     }
 
-    gui_mainStatusBar->SetStatusText(wxString::Format(_("Processed %lu files of %lu."), fileIterator + 1, mp_listManager->size()), 1);
+    gui_mainStatusBar->SetStatusText(wxString::Format(_("Processed %lu files of %d."), fileIterator + 1, gui_lstFiles->GetItemCount()), 1);
 }
 
 int GuiFrameMain::processOutputString(unsigned long int fileIterator) {
@@ -380,20 +384,20 @@ int GuiFrameMain::processOutputString(unsigned long int fileIterator) {
 
                 // Update Version column
                 if (tempString.AfterFirst('(').BeforeFirst(')').Find(_T("MPEG")) != wxNOT_FOUND)
-                    mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_VERSION, tempString.AfterFirst('(').BeforeFirst(')'));
+                    gui_lstFiles->SetItem(fileIterator, ID_LIST_VERSION, tempString.AfterFirst('(').BeforeFirst(')'));
 
                 // Update Tags column
-                mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_TAGS, tempString.AfterFirst(',').BeforeFirst(','));
+                gui_lstFiles->SetItem(fileIterator, ID_LIST_TAGS, tempString.AfterFirst(',').BeforeFirst(','));
 
                 // Update CBR column
                 if (tempString.AfterFirst(',').AfterFirst(',').Find(_T("CBR")) != wxNOT_FOUND)
-                    mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_CBR, _T("CBR"));
+                    gui_lstFiles->SetItem(fileIterator, ID_LIST_CBR, _T("CBR"));
                 else
-                    mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_CBR, _T("VBR"));
+                    gui_lstFiles->SetItem(fileIterator, ID_LIST_CBR, _T("VBR"));
 
                 int semicolonAt = tempString.Find("; ");
                 if (semicolonAt != -1)
-                    mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_BITRATE, tempString.substr(semicolonAt + 2));
+                    gui_lstFiles->SetItem(fileIterator, ID_LIST_BITRATE, tempString.substr(semicolonAt + 2));
             }
 
             if (tempString.StartsWith(_T("WARNING: ")))
@@ -413,16 +417,16 @@ int GuiFrameMain::processOutputString(unsigned long int fileIterator) {
         switch (stateMP3) {
         default:
         case STATE_MP3_OK:
-            mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_STATE, _("OK"));
-            mp_listManager->getListCtrl().SetItemTextColour(fileIterator, *wxBLACK);
+            gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("OK"));
+            gui_lstFiles->SetItemTextColour(fileIterator, *wxBLACK);
             break;
         case STATE_MP3_PROBLEM:
-            mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_STATE, _("PROBLEM"));
-            mp_listManager->getListCtrl().SetItemTextColour(fileIterator, *wxRED);
+            gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("PROBLEM"));
+            gui_lstFiles->SetItemTextColour(fileIterator, *wxRED);
             break;
         case STATE_MP3_FIXED:
-            mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_STATE, _("FIXED"));
-            mp_listManager->getListCtrl().SetItemTextColour(fileIterator, *wxBLACK);
+            gui_lstFiles->SetItem(fileIterator, ID_LIST_STATE, _("FIXED"));
+            gui_lstFiles->SetItemTextColour(fileIterator, *wxBLACK);
             break;
         }
 

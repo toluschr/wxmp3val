@@ -10,11 +10,11 @@
 #include <wx/tokenzr.h>
 
 ListManager::ListManager(wxListCtrl *listCtrl) : mp_listCtrl(listCtrl) {
-    mp_filesData = new std::list<FileData>();
+    // mp_filesData = new std::list<FileData>();
 }
 
 ListManager::~ListManager() {
-    delete mp_filesData;
+    // delete mp_filesData;
 }
 
 void ListManager::insertFilesAndDir(const wxArrayString &filenames) {
@@ -38,23 +38,24 @@ void ListManager::insertFiles(const wxArrayString &filenames) {
     for (unsigned long int n = 0; n < nFiles; n++) {
         wxFileName file(filenames[n]);
 
-        if (checkValidExtension(file)) {
-            // Don't insert repeated filenames
-            bool repeated = false;
+        if (file.GetExt().CmpNoCase("mp3") != 0)
+            continue;
 
-            unsigned long int i = 0;
-            std::list<FileData>::iterator fileData = mp_filesData->begin();
-            for (; fileData != mp_filesData->end(); fileData++, i++) {
-                wxFileName filenameInput = (*fileData).getFileName();
-                if (filenameInput.GetFullPath() == filenames[n]) {
-                    repeated = true;
-                }
+        // Don't insert repeated filenames
+        bool duplicate = false;
+        int foundAt = -1;
+        while ((foundAt = mp_listCtrl->FindItem(-1, file.GetFullName())) != wxNOT_FOUND) {
+            if (((FileData *)mp_listCtrl->GetItemData(foundAt))->getFileName().SameAs(file)) {
+                duplicate = true;
+                break;
             }
-            if (!repeated) {
-                mp_listCtrl->InsertItem(mp_listCtrl->GetItemCount(), file.GetFullName());
-                mp_listCtrl->SetItem(i, 1, file.GetPath());
-                mp_filesData->push_back(FileData(filenames[n]));
-            }
+        }
+
+        if (!duplicate) {
+            int idx = mp_listCtrl->GetItemCount();
+            mp_listCtrl->InsertItem(idx, file.GetFullName());
+            mp_listCtrl->SetItem(idx, ID_LIST_FOLDER, file.GetPath());
+            mp_listCtrl->SetItemPtrData(idx, (wxUIntPtr)new FileData(file));
         }
     }
 }
@@ -64,40 +65,4 @@ void ListManager::insertDir(const wxString &dirname) {
     wxDir::GetAllFiles(dirname, &files);
 
     insertFiles(files);
-}
-
-bool ListManager::checkValidExtension(const wxFileName &file) const {
-    wxStringTokenizer strToken(APP_OPEN_EXT, _T(";"));
-    while (strToken.HasMoreTokens()) {
-        wxString token = strToken.GetNextToken();
-
-        if (file.GetExt().CmpNoCase(token) == 0)
-            return true;
-    }
-    return false;
-}
-
-void ListManager::deleteItem(unsigned long int index) {
-    std::list<FileData>::iterator fileData = mp_filesData->begin();
-    std::advance(fileData, index);
-    mp_filesData->erase(fileData);
-}
-
-void ListManager::clear() {
-    mp_listCtrl->DeleteAllItems();
-    mp_filesData->clear();
-}
-
-long unsigned int ListManager::size() {
-    return mp_filesData->size();
-}
-
-FileData &ListManager::getFileData(unsigned long int index) {
-    std::list<FileData>::iterator fileData = mp_filesData->begin();
-    std::advance(fileData, index);
-    return *fileData;
-}
-
-wxListCtrl &ListManager::getListCtrl() {
-    return *mp_listCtrl;
 }
