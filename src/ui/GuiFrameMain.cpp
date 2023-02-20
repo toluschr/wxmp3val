@@ -31,6 +31,7 @@ GuiFrameMain::GuiFrameMain(wxWindow *parent) : FrameMain(parent), m_processRunni
     gui_lstFiles->InsertColumn(ID_LIST_VERSION, _("Version"), wxLIST_FORMAT_LEFT, 100);
     gui_lstFiles->InsertColumn(ID_LIST_TAGS, _("Tags"), wxLIST_FORMAT_LEFT, 100);
     gui_lstFiles->InsertColumn(ID_LIST_CBR, _("CBR"), wxLIST_FORMAT_LEFT, 70);
+    gui_lstFiles->InsertColumn(ID_LIST_BITRATE, _("Bitrate"), wxLIST_FORMAT_LEFT, 70);
     gui_lstFiles->InsertColumn(ID_LIST_STATE, _("State"), wxLIST_FORMAT_LEFT, 70);
 
     // Set statusbar widths
@@ -389,6 +390,10 @@ int GuiFrameMain::processOutputString(unsigned long int fileIterator) {
                     mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_CBR, _T("CBR"));
                 else
                     mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_CBR, _T("VBR"));
+
+                int semicolonAt = tempString.Find("; ");
+                if (semicolonAt != -1)
+                    mp_listManager->getListCtrl().SetItem(fileIterator, ID_LIST_BITRATE, tempString.substr(semicolonAt + 2));
             }
 
             if (tempString.StartsWith(_T("WARNING: ")))
