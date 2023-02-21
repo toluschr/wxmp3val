@@ -3,9 +3,11 @@
  * http://www.gnu.org/licenses/gpl-3.0.html
  */
 
-#include "GuiFrameMain.hpp"
-#include "../Constants.hpp"
 #include "GuiDialogSettings.hpp"
+#include "GuiFrameMain.hpp"
+
+#include "../Constants.hpp"
+#include "../Process.hpp"
 
 #include <wx/aboutdlg.h>
 #include <wx/dirdlg.h>
@@ -223,22 +225,12 @@ void GuiFrameMain::mnuSettings(wxCommandEvent &event) {
 }
 
 void GuiFrameMain::mnuScan(wxCommandEvent &event) {
-    m_processType = TOOL_SCAN;
-    m_processRunning = true;
-    updateControls();
-    processExecute();
-    m_processRunning = false;
-    updateControls();
+    processExecute(false);
     event.Skip(false);
 }
 
 void GuiFrameMain::mnuRepair(wxCommandEvent &event) {
-    m_processType = TOOL_FIX;
-    m_processRunning = true;
-    updateControls();
-    processExecute();
-    m_processRunning = false;
-    updateControls();
+    processExecute(true);
     event.Skip(false);
 }
 
@@ -283,9 +275,7 @@ void GuiFrameMain::loadResources() {
 }
 
 void GuiFrameMain::updateControls() {
-    wxString strNFiles;
-    strNFiles += wxString::Format(_T("%i "), gui_lstFiles->GetItemCount());
-    strNFiles += _("files");
+    wxString strNFiles = wxString::Format(_T("%i files"), gui_lstFiles->GetItemCount());
     gui_mainStatusBar->SetStatusText(strNFiles, 1);
 
     for (size_t i = 0; i < gui_menuBar->GetMenuCount(); i++)
@@ -319,14 +309,17 @@ void GuiFrameMain::setFilesCmdLine(const wxArrayString &filenames) {
     mp_listManager->insertFilesAndDir(filenames);
 }
 
-void GuiFrameMain::processExecute() {
+void GuiFrameMain::processExecute(bool fix) {
+    m_processRunning = true;
+    updateControls();
+
     unsigned long int total = gui_lstFiles->GetItemCount();
     unsigned long int fileIdx;
     wxString msg;
 
     gui_gugProgress->SetRange((int)total);
     for (fileIdx = 0; fileIdx < total; fileIdx++) {
-        processFile(fileIdx);
+        processFile(fileIdx, fix);
         gui_gugProgress->SetValue((int)fileIdx + 1);
 
         if (!m_processRunning) {
@@ -344,21 +337,31 @@ void GuiFrameMain::processExecute() {
     wxMessageBox(msg, APP_NAME, wxOK | wxICON_INFORMATION);
 
     gui_gugProgress->SetValue(0);
+
+    m_processRunning = false;
+    updateControls();
 }
 
-void GuiFrameMain::processFile(unsigned long int fileIterator) {
+void GuiFrameMain::processFile(unsigned long int fileIterator, bool fix) {
+    // wxSemaphore pc{};
+    // auto p = new Process(NULL);
+
+    // p->Redirect();
+    // wxExecute(APP_TOOL_EXECUTABLE + _T(" -v"), wxEXEC_NODISABLE | wxEXEC_ASYNC , p);
+
+    // pc.Wait();
+
+    // return;
     FileData &fileData = *(FileData *)gui_lstFiles->GetItemData(fileIterator);
-    printf("%s\n", (const char*)fileData.getFileName().GetFullPath().c_str());
 
     // Do not process OK MP3's again
     if (fileData.getStateMP3() == STATE_MP3_OK)
         return;
 
-    wxString cmd = APP_TOOL_EXECUTABLE + _T(" \"") + fileData.getFileName().GetFullPath() + _T("\"");;
+    wxString cmd = APP_TOOL_EXECUTABLE + _T(" \"") + fileData.getFileName().GetFullPath() + _T("\"");
 
-    if (m_processType == TOOL_FIX) {
+    if (fix)
         cmd += _T(" -f ") + mp_appSettings->getStringToolOptions();
-    }
 
     wxArrayString stdoutString;
     wxExecute(cmd, stdoutString, wxEXEC_NODISABLE | wxEXEC_SYNC);

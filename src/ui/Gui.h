@@ -74,7 +74,6 @@ class FrameMain : public wxFrame
 		wxToolBarToolBase* gui_tbSettings;
 		wxToolBarToolBase* gui_tbAbout;
 		wxMenu* gui_menu;
-		wxTimer m_timer1;
 
 		// Virtual event handlers, override them in your derived class
 		virtual void OnlstFilesDeleteItem( wxListEvent& event ) { event.Skip(); }
@@ -95,7 +94,6 @@ class FrameMain : public wxFrame
 		virtual void mnuToolWebsite( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuWebsite( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuAbout( wxCommandEvent& event ) { event.Skip(); }
-		virtual void OnTimer1Trigger( wxTimerEvent& event ) { event.Skip(); }
 
 
 	public:

@@ -41,15 +41,15 @@ class GuiFrameMain : public FrameMain {
   private:
     void updateControls();
     void loadResources();
-    void processExecute();
-    void processFile(unsigned long int fileIterator);
+    void processExecute(bool fix);
+    void processFile(unsigned long int fileIterator, bool fix);
     int processOutputString(unsigned long int fileIterator, const wxArrayString &inputString);
 
     int m_lastSortCol = -1;
     AppSettings *mp_appSettings;
     ListManager *mp_listManager;
     FileDrop *mp_fileDrop;
-    int m_processType;
+    // int m_processType;
     bool m_processRunning;
 };
 
