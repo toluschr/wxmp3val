@@ -1,28 +1,12 @@
-# wxMP3val [![Actions Status](https://github.com/cfgnunes/wxmp3val/workflows/build/badge.svg)](https://github.com/cfgnunes/wxmp3val/actions)
+# wxMP3val
+
+## Modified version of https://github.com/cfgnunes/wxmp3val 
 
 wxMP3val is a free front-end for the [MP3val](http://mp3val.sourceforge.net).
 
 ![screenshot](doc/screenshot.png)
 
 ## Getting Started
-
-### Install from binaries
-
-The pre-compiled binaries have been tested to work on the following platforms:
-
-- Windows XP, Vista, 7, 8, 10
-- Ubuntu 16.04, 18.04, 20.04, 22.04
-- Mint 20.2, 20.4
-
-Link to download the pre-compiled binary files: <https://github.com/cfgnunes/wxmp3val/releases>
-
-On Linux, you can also install them via *Personal Package Archive (PPA)*:
-
-```sh
-sudo add-apt-repository -y ppa:cfgnunes/ppa
-sudo apt update
-sudo apt -y install wxmp3val
-```
 
 ### Install from sources
 
@@ -73,17 +57,6 @@ cmake --build . --tar
 
 To create an installer on Windows, which is optional, the [Inno Setup](http://www.jrsoftware.org/isinfo.php) must to be downloaded and installed.
 To generate the installer setup, use file `installer.iss` in the Inno Setup after build the binaries.
-
-## Contributing
-
-If you spot a bug, or want to improve the code, or even improve the content, you can do the following:
-
-- [Open an issue](https://github.com/cfgnunes/wxmp3val/issues/new) describing the bug or feature idea;
-- Fork the project, make changes, and submit a pull request.
-
-## Versioning
-
-This project uses [SemVer](https://semver.org) for versioning. For the versions available, see the [tags on this repository](https://github.com/cfgnunes/wxmp3val/tags).
 
 ## License
 
