@@ -1,6 +1,7 @@
-# wxMP3val
+# Modified version of https://github.com/cfgnunes/wxmp3val 
+Head over to https://github.com/toluschr/wxmp3val/projects to see which modifications are planned
 
-## Modified version of https://github.com/cfgnunes/wxmp3val 
+# wxMP3val
 
 wxMP3val is a free front-end for the [MP3val](http://mp3val.sourceforge.net).
 
