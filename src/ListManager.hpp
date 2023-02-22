@@ -20,6 +20,7 @@ class ListManager {
 
     void insertFilesAndDir(const wxArrayString &filenames);
     void insertFiles(const wxArrayString &filenames);
+    void insertFile(const wxString &filename);
     void insertDir(const wxString &dirname);
 
   private:

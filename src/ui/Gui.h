@@ -77,8 +77,6 @@ class FrameMain : public wxFrame
 		wxMenu* gui_menu;
 
 		// Virtual event handlers, override them in your derived class
-		virtual void OnlstFilesDeleteItem( wxListEvent& event ) { event.Skip(); }
-		virtual void OnlstFilesInsertItem( wxListEvent& event ) { event.Skip(); }
 		virtual void OnlstFilesItemSelect( wxListEvent& event ) { event.Skip(); }
 		virtual void OnlstFilesItemRClick( wxListEvent& event ) { event.Skip(); }
 		virtual void OnlstFilesKeyDown( wxListEvent& event ) { event.Skip(); }
