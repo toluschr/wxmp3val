@@ -23,6 +23,12 @@
 IMPLEMENT_APP(Main)
 
 bool Main::OnInit() {
+    // AllocConsole();
+    // FILE *Tmp;
+    // freopen_s(&Tmp, "CONOUT$", "w", stderr);
+    // freopen_s(&Tmp, "CONOUT$", "w", stdout);
+    // freopen_s(&Tmp, "CONIN$", "r", stdin);
+
     // Load language translation
     mp_locale = new wxLocale(wxLocale::GetSystemLanguage());
     mp_locale->AddCatalogLookupPathPrefix(getDataDir() + _T("po"));

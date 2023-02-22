@@ -7,7 +7,6 @@
 #include "GuiFrameMain.hpp"
 
 #include "../Constants.hpp"
-#include "../Process.hpp"
 
 #include <wx/aboutdlg.h>
 #include <wx/dirdlg.h>
@@ -139,6 +138,16 @@ void GuiFrameMain::OnlstFilesColClick(wxListEvent &event) {
     event.Skip();
 }
 
+void GuiFrameMain::OnlstFilesItemActivated(wxListEvent &event) {
+    long itemIndex = -1;
+    while ((itemIndex = gui_lstFiles->GetNextItem(itemIndex, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != wxNOT_FOUND) {
+        FileData *fd = (FileData*)gui_lstFiles->GetItemData(itemIndex);
+        wxLaunchDefaultApplication(fd->getFileName().GetFullPath());
+    }
+
+    event.Skip();
+}
+
 void GuiFrameMain::btnProcessStop(wxCommandEvent &event) {
     m_processRunning = false;
     gui_btnStop->Enable(false);
@@ -257,6 +266,15 @@ void GuiFrameMain::mnuAbout(wxCommandEvent &event) {
     event.Skip(false);
 }
 
+void GuiFrameMain::mnuOpenFolder(wxCommandEvent &event) {
+    long itemIndex = -1;
+    while ((itemIndex = gui_lstFiles->GetNextItem(itemIndex, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != wxNOT_FOUND) {
+        FileData *fd = (FileData*)gui_lstFiles->GetItemData(itemIndex);
+        wxLaunchDefaultApplication(fd->getFileName().GetPath());
+    }
+    event.Skip(false);
+}
+
 void GuiFrameMain::loadResources() {
     wxString dataDir = getDataDir();
 
@@ -343,15 +361,6 @@ void GuiFrameMain::processExecute(bool fix) {
 }
 
 void GuiFrameMain::processFile(unsigned long int fileIterator, bool fix) {
-    // wxSemaphore pc{};
-    // auto p = new Process(NULL);
-
-    // p->Redirect();
-    // wxExecute(APP_TOOL_EXECUTABLE + _T(" -v"), wxEXEC_NODISABLE | wxEXEC_ASYNC , p);
-
-    // pc.Wait();
-
-    // return;
     FileData &fileData = *(FileData *)gui_lstFiles->GetItemData(fileIterator);
 
     // Do not process OK MP3's again

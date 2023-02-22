@@ -154,6 +154,10 @@ FrameMain::FrameMain( wxWindow* parent, wxWindowID id, const wxString& title, co
 	gui_mnuClearList = new wxMenuItem( gui_menu, ID_CLEAR_LIST, wxString( _("Clear list") ) , wxEmptyString, wxITEM_NORMAL );
 	gui_menu->Append( gui_mnuClearList );
 
+	wxMenuItem* gui_mnuOpenFolder;
+	gui_mnuOpenFolder = new wxMenuItem( gui_menu, ID_OPEN_FOLDER, wxString( _("Open folder") ) , wxEmptyString, wxITEM_NORMAL );
+	gui_menu->Append( gui_mnuOpenFolder );
+
 	this->Connect( wxEVT_RIGHT_DOWN, wxMouseEventHandler( FrameMain::FrameMainOnContextMenu ), NULL, this );
 
 	// m_timer1.SetOwner( this, wxID_ANY );
@@ -168,6 +172,8 @@ FrameMain::FrameMain( wxWindow* parent, wxWindowID id, const wxString& title, co
 	gui_lstFiles->Connect( wxEVT_COMMAND_LIST_ITEM_SELECTED, wxListEventHandler( FrameMain::OnlstFilesItemSelect ), NULL, this );
 	gui_lstFiles->Connect( wxEVT_COMMAND_LIST_KEY_DOWN, wxListEventHandler( FrameMain::OnlstFilesKeyDown ), NULL, this );
 	gui_lstFiles->Connect( wxEVT_COMMAND_LIST_COL_CLICK, wxListEventHandler( FrameMain::OnlstFilesColClick ), NULL, this );
+	gui_lstFiles->Connect( wxEVT_COMMAND_LIST_ITEM_ACTIVATED, wxListEventHandler( FrameMain::OnlstFilesItemActivated ), NULL, this );
+
 	gui_btnStop->Connect( wxEVT_COMMAND_BUTTON_CLICKED, wxCommandEventHandler( FrameMain::btnProcessStop ), NULL, this );
 	gui_mnbFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( FrameMain::mnuAddDirectory ), this, gui_mnbAddFolder->GetId());
 	gui_mnbFile->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( FrameMain::mnuAddFiles ), this, gui_mnbAddFiles->GetId());
@@ -192,6 +198,7 @@ FrameMain::FrameMain( wxWindow* parent, wxWindowID id, const wxString& title, co
 	gui_menu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( FrameMain::mnuAddFiles ), this, gui_mnuAddFiles->GetId());
 	gui_menu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( FrameMain::mnuRemoveFiles ), this, gui_mnuRemoveFiles->GetId());
 	gui_menu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( FrameMain::mnuClearList ), this, gui_mnuClearList->GetId());
+	gui_menu->Bind(wxEVT_COMMAND_MENU_SELECTED, wxCommandEventHandler( FrameMain::mnuOpenFolder ), this, ID_OPEN_FOLDER);
 }
 
 FrameMain::~FrameMain()

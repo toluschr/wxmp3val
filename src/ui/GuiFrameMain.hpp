@@ -25,6 +25,8 @@ class GuiFrameMain : public FrameMain {
     void OnlstFilesItemRClick(wxListEvent &event);
     void OnlstFilesKeyDown(wxListEvent &event);
     void OnlstFilesColClick(wxListEvent& event);
+    void OnlstFilesItemActivated(wxListEvent &event);
+
     void btnProcessStop(wxCommandEvent &event);
     void mnuAddDirectory(wxCommandEvent &event);
     void mnuAddFiles(wxCommandEvent &event);
@@ -37,6 +39,7 @@ class GuiFrameMain : public FrameMain {
     void mnuWebsite(wxCommandEvent &event);
     void mnuToolWebsite(wxCommandEvent &event);
     void mnuAbout(wxCommandEvent &event);
+    void mnuOpenFolder(wxCommandEvent &event);
 
   private:
     void updateControls();

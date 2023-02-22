@@ -40,12 +40,13 @@
 #define ID_EXIT 1002
 #define ID_REMOVE_FILES 1003
 #define ID_CLEAR_LIST 1004
-#define ID_SETTINGS 1005
-#define ID_SCAN 1006
-#define ID_REPAIR 1007
-#define ID_WEBSITE 1008
-#define ID_TOOL_WEBSITE 1009
-#define ID_ABOUT 1010
+#define ID_OPEN_FOLDER 1005
+#define ID_SETTINGS 1006
+#define ID_SCAN 1007
+#define ID_REPAIR 1008
+#define ID_WEBSITE 1009
+#define ID_TOOL_WEBSITE 1010
+#define ID_ABOUT 1011
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Class FrameMain
@@ -82,6 +83,8 @@ class FrameMain : public wxFrame
 		virtual void OnlstFilesItemRClick( wxListEvent& event ) { event.Skip(); }
 		virtual void OnlstFilesKeyDown( wxListEvent& event ) { event.Skip(); }
 		virtual void OnlstFilesColClick( wxListEvent& event ) { event.Skip(); }
+		virtual void OnlstFilesItemActivated( wxListEvent& event ) { event.Skip(); }
+
 		virtual void btnProcessStop( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuAddDirectory( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuAddFiles( wxCommandEvent& event ) { event.Skip(); }
@@ -94,6 +97,7 @@ class FrameMain : public wxFrame
 		virtual void mnuToolWebsite( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuWebsite( wxCommandEvent& event ) { event.Skip(); }
 		virtual void mnuAbout( wxCommandEvent& event ) { event.Skip(); }
+		virtual void mnuOpenFolder( wxCommandEvent& event ) { event.Skip(); }
 
 
 	public:
