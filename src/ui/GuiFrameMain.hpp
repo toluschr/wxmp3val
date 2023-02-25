@@ -7,16 +7,17 @@
 #define GUI_FRAME_MAIN_HPP
 
 #include "../AppSettings.hpp"
-#include "../FileDrop.hpp"
-#include "../ListManager.hpp"
 #include "Gui.h"
 
-class GuiFrameMain : public FrameMain {
+#include <wx/dnd.h>
+
+class GuiFrameMain : public FrameMain/*, public wxFileDropTarget */{
   public:
     GuiFrameMain(wxWindow *parent);
     virtual ~GuiFrameMain();
 
     void setFilesCmdLine(const wxArrayString &filenames);
+    // virtual bool OnDropFiles(wxCoord, wxCoord, const wxArrayString &filenames);
 
   protected:
     void OnlstFilesDeleteItem(wxListEvent &event);
@@ -50,8 +51,7 @@ class GuiFrameMain : public FrameMain {
 
     int m_lastSortCol = -1;
     AppSettings *mp_appSettings;
-    ListManager *mp_listManager;
-    FileDrop *mp_fileDrop;
+    // FileDrop *mp_fileDrop;
     // int m_processType;
     bool m_processRunning;
 };

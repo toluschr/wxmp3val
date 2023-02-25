@@ -7,6 +7,8 @@
 #include "GuiFrameMain.hpp"
 
 #include "../Constants.hpp"
+#include "../FileImport.hpp"
+#include "../FileData.hpp"
 
 #include <wx/aboutdlg.h>
 #include <wx/dirdlg.h>
@@ -19,12 +21,8 @@ GuiFrameMain::GuiFrameMain(wxWindow *parent) : FrameMain(parent), m_processRunni
     // Disable status bar pane used to display menu and toolbar help
     SetStatusBarPane(-1);
 
-    // File list manager
-    mp_listManager = new ListManager(gui_lstFiles);
-
     // List Drag & Drop
-    mp_fileDrop = new FileDrop(mp_listManager);
-    gui_lstFiles->SetDropTarget(mp_fileDrop);
+    // gui_lstFiles->SetDropTarget(this);
 
     // Title List
     gui_lstFiles->InsertColumn(ID_LIST_FILE, _("File"), wxLIST_FORMAT_LEFT, 200);
@@ -62,24 +60,16 @@ GuiFrameMain::GuiFrameMain(wxWindow *parent) : FrameMain(parent), m_processRunni
 }
 
 GuiFrameMain::~GuiFrameMain() {
-    delete mp_listManager;
     delete mp_appSettings;
 }
 
-void GuiFrameMain::OnlstFilesDeleteItem(wxListEvent &event) {
-    if (!m_processRunning) {
-        delete (FileData*)gui_lstFiles->GetItemData(event.GetIndex());
-        updateControls();
-    }
-    event.Skip();
+/*
+bool GuiFrameMain::OnDropFiles(wxCoord, wxCoord, const wxArrayString &filenames)
+{
+    printf("%u\n", FileImport::InsertArray(gui_lstFiles, filenames));
+    return false;
 }
-
-void GuiFrameMain::OnlstFilesInsertItem(wxListEvent &event) {
-    if (!m_processRunning) {
-        updateControls();
-    }
-    event.Skip();
-}
+*/
 
 void GuiFrameMain::OnlstFilesItemSelect(wxListEvent &event) {
     if (!m_processRunning) {
@@ -162,12 +152,14 @@ void GuiFrameMain::mnuAddDirectory(wxCommandEvent &event) {
     dirDialog.SetPath(mp_appSettings->getLastOpenDir());
     if (dirDialog.ShowModal() == wxID_OK) {
         SetCursor(wxCURSOR_WAIT);
-        mp_listManager->insertDir(dirDialog.GetPath());
+        FileImport::Insert(gui_lstFiles, dirDialog.GetPath());
 
         // Remembers the last used directory
         mp_appSettings->setLastOpenDir(dirDialog.GetPath());
         SetCursor(wxCURSOR_ARROW);
     }
+
+    updateControls();
     event.Skip(false);
 }
 
@@ -184,12 +176,14 @@ void GuiFrameMain::mnuAddFiles(wxCommandEvent &event) {
 
         // Get the file(s) the user selected
         fileDialog.GetPaths(files);
-        mp_listManager->insertFiles(files);
+        FileImport::InsertArray(gui_lstFiles, files);
 
         // Remembers the last used directory
         mp_appSettings->setLastOpenDir(fileDialog.GetDirectory());
         SetCursor(wxCURSOR_ARROW);
     }
+
+    updateControls();
     event.Skip(false);
 }
 
@@ -200,12 +194,15 @@ void GuiFrameMain::mnuExit(wxCommandEvent &event) {
 }
 
 void GuiFrameMain::mnuRemoveFiles(wxCommandEvent &event) {
-    int itemCount = gui_lstFiles->GetSelectedItemCount();
     SetCursor(wxCURSOR_WAIT);
-    for (int i = 0; i < itemCount; i++) {
-        long item = gui_lstFiles->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED);
-        gui_lstFiles->DeleteItem(item);
+
+    int itemIndex;
+    while ((itemIndex = gui_lstFiles->GetNextItem(-1, wxLIST_NEXT_ALL, wxLIST_STATE_SELECTED)) != wxNOT_FOUND) {
+        FileData *data = (FileData*)gui_lstFiles->GetItemData(itemIndex);
+        gui_lstFiles->DeleteItem(itemIndex);
+        delete data;
     }
+
     SetCursor(wxCURSOR_ARROW);
 
     updateControls();
@@ -324,7 +321,9 @@ void GuiFrameMain::updateControls() {
 }
 
 void GuiFrameMain::setFilesCmdLine(const wxArrayString &filenames) {
-    mp_listManager->insertFilesAndDir(filenames);
+    FileImport::InsertArray(gui_lstFiles, filenames);
+
+    updateControls();
 }
 
 void GuiFrameMain::processExecute(bool fix) {
